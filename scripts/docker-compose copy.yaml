@@ -1,0 +1,76 @@
+version: "3.9"
+services:
+
+  actio-api:
+    image: actio-api:latest
+    ports:
+      - "6379"
+    networks:
+      - frontend
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  actio-activity-svc:
+    image: actio-activity-svc:latest
+    ports:
+        - "6379"
+    networks:
+        - frontend
+    deploy:
+        replicas: 2
+        update_config:
+        parallelism: 2
+        delay: 10s
+        restart_policy:
+        condition: on-failure  
+        
+  actio-identity-svc:
+    image: actio-identity-svc:latest
+    ports:
+        - "6379"
+    networks:
+        - frontend
+    deploy:
+        replicas: 2
+        update_config:
+        parallelism: 2
+        delay: 10s
+        restart_policy:
+        condition: on-failure  
+        
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+        - "6379"
+    networks:
+        - frontend
+    deploy:
+        replicas: 2
+        update_config:
+        parallelism: 2
+        delay: 10s
+        restart_policy:
+        condition: on-failure  
+  db:
+    image: mongo:latest
+    volumes:
+      - db-data:/var/lib/mongodb/data
+    networks:
+      - backend
+    deploy:
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - "node.role==manager"
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  db-data:

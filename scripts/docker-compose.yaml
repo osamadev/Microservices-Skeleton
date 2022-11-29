@@ -1,0 +1,88 @@
+version: "3.0"
+services:
+
+  actio-api:
+    image: actio-api:latest
+    ports:
+      - "8081:8081"
+    networks:
+      - test-network
+    depends_on: 
+      - rabbitmq
+      - mongodb
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+  
+  actio-activity-svc:
+    image: actio-activity-svc:latest
+    ports:
+        - "8082:8082"
+    networks:
+        - test-network
+    depends_on: 
+        - rabbitmq
+        - mongodb
+    deploy:
+        replicas: 1
+        update_config:
+            parallelism: 2
+            delay: 10s
+        restart_policy:
+            condition: on-failure  
+        
+  actio-identity-svc:
+    image: actio-identity-svc:latest
+    ports:
+        - "8083:8083"
+    networks:
+        - test-network
+    depends_on: 
+        - rabbitmq
+        - mongodb
+    deploy:
+        replicas: 1
+        update_config:
+          parallelism: 2
+          delay: 10s
+        restart_policy:
+          condition: on-failure  
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.8.19-management
+    networks:
+        - test-network
+    ports:
+        - "7001:5672"
+        - "7002:15672"
+    environment:
+        RABBITMQ_DEFAULT_USER: "guest"
+        RABBITMQ_DEFAULT_PASS: "guest"
+    restart: always
+ 
+  mongodb:
+    container_name: mongodb
+    image: mongo:3.6
+    networks:
+        - test-network
+    restart: always
+    environment:
+        MONGO_DATA_DIR: /data/db
+        MONGO_LOG_DIR: /dev/null
+    volumes:
+        - mongo-data:/data/db
+    ports:
+        - "7007:27017"
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+    
+
+networks:   
+  test-network:
+
+volumes:
+  mongo-data:
